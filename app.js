@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 const https = require("https");
 const { randomUUID } = require("crypto");
+const apiKeys = ["Bearer sk-11223344","Bearer sk-1122334455"]
 
 // Constants for the server and API configuration
 const port = 3040;
@@ -117,6 +118,22 @@ function enableCORS(req, res, next) {
 
 // Middleware to handle chat completions
 async function handleChatCompletion(req, res) {
+  if (apiKeys.includes(req.headers["authorization"])) {
+    console.log(req.headers["authorization"]+' 鉴权成功');
+  } else {
+    console.log(req.headers["authorization"]+' 鉴权失败');
+    res.write(
+      JSON.stringify({
+        status: false,
+        error: {
+          message:
+            "Authentication failed. Please check if the 'authorization' parameter is correct.",
+          type: "authorization_failed",
+        },
+      })
+    );
+    res.end();
+  }
   console.log(
     "Request:",
     `${req.method} ${req.originalUrl}`,
